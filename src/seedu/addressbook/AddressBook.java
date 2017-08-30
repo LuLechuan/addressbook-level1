@@ -121,6 +121,11 @@ public class AddressBook {
     private static final String COMMAND_DELETE_PARAMETER = "INDEX";
     private static final String COMMAND_DELETE_EXAMPLE = COMMAND_DELETE_WORD + " 1";
 
+    private static final String COMMAND_UNDO_WORD = "undo";
+    private static final String COMMAND_UNDO_DESC = "Undo a deletion";
+    private static final String COMMAND_UNDO_EXAMPLE = COMMAND_UNDO_WORD;
+    private static String[] deletedPerson = null;
+
     private static final String COMMAND_CLEAR_WORD = "clear";
     private static final String COMMAND_CLEAR_DESC = "Clears address book permanently.";
     private static final String COMMAND_CLEAR_EXAMPLE = COMMAND_CLEAR_WORD;
@@ -377,6 +382,8 @@ public class AddressBook {
             return executeListAllPersonsInAddressBook();
         case COMMAND_DELETE_WORD:
             return executeDeletePerson(commandArgs);
+        case COMMAND_UNDO_WORD:
+            return excuteUndoDeletion();
         case COMMAND_CLEAR_WORD:
             return executeClearAddressBook();
         case COMMAND_HELP_WORD:
@@ -556,6 +563,15 @@ public class AddressBook {
      */
     private static String getMessageForSuccessfulDelete(String[] deletedPerson) {
         return String.format(MESSAGE_DELETE_PERSON_SUCCESS, getMessageForFormattedPersonData(deletedPerson));
+    }
+
+    private static String excuteUndoDeletion() {
+        if (deletedPerson != null) {
+            addPersonToAddressBook(deletedPerson);
+            deletedPerson = null;
+            return "Undo deletion";
+        }
+        return "Nothing to undo";
     }
 
     /**
@@ -796,6 +812,7 @@ public class AddressBook {
     private static boolean deletePersonFromAddressBook(String[] exactPerson) {
         final boolean changed = ALL_PERSONS.remove(exactPerson);
         if (changed) {
+            deletedPerson = exactPerson;
             savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
         }
         return changed;
